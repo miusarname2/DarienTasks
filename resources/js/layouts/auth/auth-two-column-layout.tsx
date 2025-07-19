@@ -34,7 +34,7 @@ export default function AuthTwoColumnLayout({ children, title, description }: Pr
                         </div>
 
                         <h2 className="text-2xl font-semibold tracking-tight">
-                            Sign in to <span className="text-primary">Taskly</span>
+                            Starts in to <span className="text-primary">Taskly</span>
                         </h2>
                         <p className="text-sm text-muted-foreground mt-2">
                             {description}
