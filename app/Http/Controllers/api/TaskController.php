@@ -17,7 +17,7 @@ class TaskController extends Controller
      * @param  string  $passphrase    La “clave” que usaste en front (tu token)
      * @return string|null            El texto original, o null si algo falla
      */
-    private function decryptCryptoJS(string $base64String, string $passphrase): ?string
+    protected function decryptCryptoJS(string $base64String, string $passphrase): ?string
     {
         // 1) Decodificamos Base64
         $data = base64_decode($base64String);
