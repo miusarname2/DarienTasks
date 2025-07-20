@@ -11,6 +11,7 @@ Route::post('login',    [LoginController::class,    'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [LoginController::class, 'logout']);
+    Route::get('tasks/byUser', [TaskController::class, 'searchByUserId']);
     Route::apiResource('tasks', TaskController::class);
 });
 
