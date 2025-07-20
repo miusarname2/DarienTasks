@@ -16,13 +16,37 @@ export default function TaskCreate() {
     const [description, setDescription] = useState('');
     const [dueDate, setDueDate] = useState('');
 
-    const submitForm = (e: FormEvent) => {
+    const submitForm = async (e: FormEvent) => {
         e.preventDefault();
-        router.post(
-            '/tasks',
-            { title, description, due_date: dueDate },
-            { preserveScroll: true }
-        );
+        try {
+            const token = localStorage.getItem('token'); // o donde tengas el Bearer token
+            const response = await fetch('http://localhost:8000/api/tasks', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    title,
+                    description,
+                    completed: false,
+                    user_id: 1,
+                    due_date: dueDate,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error creando la tarea');
+            }
+
+            const newTask = await response.json();
+            console.log('Tarea creada:', newTask);
+            router.visit('/tasks'); // si quieres usar Inertia para refrescar
+        } catch (error: any) {
+            console.error(error.message);
+        }
     };
 
     return (
