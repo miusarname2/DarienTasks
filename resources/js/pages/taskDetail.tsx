@@ -73,7 +73,7 @@ export default function TaskDetail() {
     if (loading) {
         return (
             <AppLayout breadcrumbs={breadcrumbs}>
-                <Head title="Cargando Tarea..." />
+                <Head title="Loading task..." />
                 <div className="flex-1 p-6 bg-white dark:bg-[#0a0a0a] rounded-lg shadow text-center">
                     <p className="text-gray-700 dark:text-gray-300">Loading task details...</p>
                 </div>

@@ -19,7 +19,8 @@ export default function TaskCreate() {
     const submitForm = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token'); // o donde tengas el Bearer token
+            const token = localStorage.getItem('token');
+            const id = localStorage.getItem('eid');
             const response = await fetch('http://localhost:8000/api/tasks', {
                 method: 'POST',
                 headers: {
@@ -31,7 +32,7 @@ export default function TaskCreate() {
                     title,
                     description,
                     completed: false,
-                    user_id: 1,
+                    user_id: id,
                     due_date: dueDate,
                 }),
             });

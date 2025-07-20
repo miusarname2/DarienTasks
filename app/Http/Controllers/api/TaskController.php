@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class TaskController extends Controller
 {
@@ -68,6 +69,23 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
+        $encryptedId = $request->input('user_id');
+        if (! $encryptedId) {
+            return response()->json(['error' => 'Encrypted ID is required'], 400);
+        }
+
+        $token = $request->bearerToken();
+        if (! $token) {
+            return response()->json(['error' => 'Token is required'], 401);
+        }
+
+        $userId = $this->decryptCryptoJS($encryptedId, $token);
+        if (! $userId) {
+            return response()->json(['error' => 'Decryption failed'], 400);
+        }
+
+        $request->merge(['user_id' => $userId]);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -83,9 +101,22 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
+        $accessToken = PersonalAccessToken::findToken($request->bearerToken());
+
+        if (!$accessToken) {
+            return response()->json(['error' => 'Token inválido'], 401);
+        }
+
+        $user = $accessToken->tokenable;
+
         $task = Task::findOrFail($id);
+
+        if ($task->user_id !== $user->id) {
+            return response()->json(['error' => 'No autorizado'], 403);
+        }
+
         return response()->json($task);
     }
 
@@ -94,17 +125,23 @@ class TaskController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $user = $request->user();
+
         $task = Task::findOrFail($id);
+
+        if ($task->user_id !== $user->id) {
+            return response()->json(['error' => 'No autorizado'], 403);
+        }
 
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'completed' => 'nullable|boolean',
-            'user_id' => 'sometimes|exists:users,id',
             'due_date' => 'nullable|date',
         ]);
 
         $task->update($validated);
+
         return response()->json($task);
     }
 
