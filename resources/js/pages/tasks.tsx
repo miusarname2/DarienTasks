@@ -30,11 +30,14 @@ export default function Tasks() {
 
     useEffect(() => {
         const token = localStorage.getItem('token');
+        const id = localStorage.getItem('eid');
 
         setLoading(true);
         setError(null);
 
-        fetch('http://localhost:8000/api/tasks', {
+        const eidParam = encodeURIComponent(id ?? "");
+
+        fetch(`http://localhost:8000/api/tasks/byUser?eid=${eidParam}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
