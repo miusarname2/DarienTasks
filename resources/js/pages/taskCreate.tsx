@@ -29,7 +29,6 @@ export default function TaskCreate() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Task" />
 
-            {/* Utiliza todo el espacio disponible */}
             <div className="flex-1 p-6 bg-white dark:bg-[#0a0a0a] rounded-lg shadow">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">New Task</h2>
                 <form onSubmit={submitForm} className="space-y-4 h-full">

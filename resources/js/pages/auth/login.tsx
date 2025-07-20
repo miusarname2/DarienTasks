@@ -1,7 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { Eye, EyeOff, LoaderCircle } from 'lucide-react';
 import { FormEvent, FormEventHandler, useState } from 'react';
-
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 import { Separator } from '@radix-ui/react-separator';
+import CryptoJS from 'crypto-js';
 
 type LoginForm = {
     email: string;
@@ -36,43 +36,45 @@ export default function Login({ status, canResetPassword }: LoginProps) {
         remember: false,
     });
 
-        const submit: FormEventHandler = async (e: FormEvent) => {
-            e.preventDefault();
-            setLoading(true);
-            setErrorMsg('');
+    const submit: FormEventHandler = async (e: FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setErrorMsg('');
 
-            try {
-                const response = await fetch('http://localhost:8000/api/login', {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        email: data.email,
-                        password: data.password,
-                        remember: data.remember,
-                    }),
-                });
+        try {
+            const response = await fetch('http://localhost:8000/api/login', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    email: data.email,
+                    password: data.password,
+                    remember: data.remember,
+                }),
+            });
 
-                const respData = await response.json();
+            const respData = await response.json();
 
-                if (!response.ok) {
-                    throw new Error(respData.message || 'Error en credenciales');
-                }
-
-                localStorage.setItem('token', respData.token);
-                post(route('login'), {
-                    onFinish: () => reset('password'),
-                });
-            } catch (err: any) {
-                setErrorMsg(err.message);
-            } finally {
-                setLoading(false);
-                reset('password');
+            if (!response.ok) {
+                throw new Error(respData.message || 'Error en credenciales');
             }
-        };
+
+            const encryptedId = CryptoJS.AES.encrypt(respData.user.id.toString(), 'clave-secreta').toString();
+            localStorage.setItem('eid', encryptedId);
+            localStorage.setItem('token', respData.token);
+            post(route('login'), {
+                onFinish: () => reset('password'),
+            });
+        } catch (err: any) {
+            setErrorMsg(err.message);
+        } finally {
+            setLoading(false);
+            reset('password');
+        }
+    };
 
     return (
         <AuthLayout

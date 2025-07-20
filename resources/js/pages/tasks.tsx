@@ -19,17 +19,46 @@ export interface Task {
 }
 
 export default function Tasks() {
-    const mockTasks: Task[] = [
-        { id: 1, title: 'abc', description: 'dfg', completed: false, user_id: 1, due_date: '2005-08-05' },
-        { id: 2, title: 'comprar leche', description: 'Ir al supermercado', completed: true, user_id: 1, due_date: '2025-07-25' },
-        { id: 3, title: 'leer libro', description: 'Capítulo sobre React', completed: false, user_id: 1, due_date: '2025-07-30' }
-    ];
 
-    const [tasks, setTasks] = useState<Task[]>(mockTasks);
+    const [tasks, setTasks] = useState<Task[]>([]);
     const [search, setSearch] = useState('');
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
     const [statusFilter, setStatusFilter] = useState('all');
     const [showModal, setShowModal] = useState(false);
     const [selectedId, setSelectedId] = useState<number | null>(null);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+
+        setLoading(true);
+        setError(null);
+
+        fetch('http://localhost:8000/api/tasks', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                // inyectamos el Bearer token
+                'Authorization': `Bearer ${token}`
+            },
+        })
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            })
+            .then((data: Task[]) => {
+                setTasks(data);
+            })
+            .catch(err => {
+                console.error(err);
+                setError('No se pudieron cargar las tareas.');
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }, []);
+
 
     const filtered = useMemo(() =>
         tasks.filter(task => {
@@ -40,10 +69,55 @@ export default function Tasks() {
                 (statusFilter === 'pending' && !task.completed);
             return matchesSearch && matchesStatus;
         })
-    , [tasks, search, statusFilter]);
+        , [tasks, search, statusFilter]);
 
-    const toggle = (id: number) => {
-        router.post(`/tasks/${id}/toggle`, {}, { preserveScroll: true });
+    const toggle = async (id: number) => {
+        // 1. Sacar el token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No hay token en localStorage');
+            return;
+        }
+
+        // 2. Encontrar la tarea actual
+        const task = tasks.find(t => t.id === id);
+        if (!task) {
+            console.error(`Tarea con id ${id} no encontrada`);
+            return;
+        }
+
+        // 3. Nuevo estado completado (true ⇄ false)
+        const newCompleted = !task.completed;
+
+        try {
+            // 4. Llamada al API
+            const res = await fetch(`http://localhost:8000/api/tasks/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ completed: newCompleted })
+            });
+
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}`);
+            }
+
+            // 5. Actualizar estado local para reflejar el cambio
+            setTasks(prev =>
+                prev.map(t =>
+                    t.id === id
+                        ? { ...t, completed: newCompleted }
+                        : t
+                )
+            );
+
+        } catch (err) {
+            console.error('Error al actualizar tarea:', err);
+            setError?.('No se pudo actualizar el estado de la tarea.');
+        }
     };
 
     const confirmRemove = (id: number) => {
@@ -51,10 +125,36 @@ export default function Tasks() {
         setShowModal(true);
     };
 
-    const remove = () => {
-        if (selectedId != null) {
-            router.delete(`/tasks/${selectedId}`, { preserveScroll: true });
+    const remove = async () => {
+        if (selectedId == null) return;
+
+        const token = localStorage.getItem('token');
+        setLoading(true);
+        setError(null);
+
+        try {
+            const res = await fetch(`http://localhost:8000/api/tasks/${selectedId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}`);
+            }
+
+            // Opcional: actualizar el estado local para quitar la tarea eliminada
+            setTasks(prev => prev.filter(task => task.id !== selectedId));
             setShowModal(false);
+
+        } catch (err) {
+            console.error(err);
+            setError('No se pudo eliminar la tarea.');
+        } finally {
+            setLoading(false);
         }
     };
 
