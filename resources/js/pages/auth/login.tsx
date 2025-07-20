@@ -1,6 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { Eye, EyeOff, LoaderCircle } from 'lucide-react';
-import { FormEventHandler, useState } from 'react';
+import { FormEvent, FormEventHandler, useState } from 'react';
 
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -24,6 +24,11 @@ interface LoginProps {
 
 export default function Login({ status, canResetPassword }: LoginProps) {
     const [showPassword, setShowPassword] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [remember, setRemember] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
 
     const { data, setData, post, processing, errors, reset } = useForm<Required<LoginForm>>({
         email: '',
@@ -31,8 +36,36 @@ export default function Login({ status, canResetPassword }: LoginProps) {
         remember: false,
     });
 
-    const submit: FormEventHandler = (e) => {
+    const submit: FormEventHandler = async (e: FormEvent) => {
         e.preventDefault();
+        setLoading(true);
+        setErrorMsg('');
+        try {
+            const response = await fetch('http://localhost:8000/api/login', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    // si Laravel espera CSRF-TOKEN en header, descomenta:
+                    // 'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'),
+                },
+                credentials: 'include',
+                body: JSON.stringify({ email, password, remember }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Error en credenciales');
+            }
+
+            localStorage.setItem('token', data.token);
+            window.location.href = '/dashboard';
+        } catch (err: any) {
+            setErrorMsg(err.message);
+        } finally {
+            setLoading(false);
+        }
         post(route('login'), {
             onFinish: () => reset('password'),
         });
