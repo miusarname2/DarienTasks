@@ -1,7 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
-
+import { FormEvent, FormEventHandler, useState } from 'react';
+import { router } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -11,24 +11,62 @@ import AuthLayout from '@/layouts/auth-layout';
 
 type RegisterForm = {
     name: string;
+    lastname: string;
     email: string;
     password: string;
     password_confirmation: string;
 };
 
 export default function Register() {
+    const [loading, setLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
     const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
         name: '',
+        lastname: '',
         email: '',
         password: '',
         password_confirmation: '',
     });
 
-    const submit: FormEventHandler = (e) => {
+    const submit: FormEventHandler = async (e: FormEvent) => {
         e.preventDefault();
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
+        setLoading(true);
+        setErrorMsg('');
+
+        try {
+            const response = await fetch('http://localhost:8000/api/register', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                // incluye cookies de sesión/XSRF para Laravel Sanctum, si lo usas:
+                credentials: 'include',
+                body: JSON.stringify({
+                    name: data.name,
+                    lastname: data.lastname,
+                    email: data.email,
+                    password: data.password,
+                    password_confirmation: data.password_confirmation,
+                }),
+            });
+
+            const respData = await response.json();
+
+            if (!response.ok) {
+                // Laravel te devolverá validaciones en respData.errors o un mensaje en respData.message
+                const message = respData.message || Object.values(respData.errors || {}).flat().join(' ');
+                throw new Error(message);
+            }
+
+            router.visit('/login');
+        } catch (err: any) {
+            setErrorMsg(err.message);
+        } finally {
+            setLoading(false);
+            // limpia los campos sensibles
+            reset('password', 'password_confirmation');
+        }
     };
 
     return (
@@ -48,9 +86,26 @@ export default function Register() {
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
                             disabled={processing}
-                            placeholder="Full name"
+                            placeholder="Name"
                         />
                         <InputError message={errors.name} className="mt-2" />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="lastname">LastName</Label>
+                        <Input
+                            id="lastname"
+                            type="text"
+                            required
+                            autoFocus
+                            tabIndex={1}
+                            autoComplete="lastname"
+                            value={data.lastname}
+                            onChange={(e) => setData('lastname', e.target.value)}
+                            disabled={processing}
+                            placeholder="Lastname"
+                        />
+                        <InputError message={errors.lastname} className="mt-2" />
                     </div>
 
                     <div className="grid gap-2">
