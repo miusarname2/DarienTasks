@@ -36,40 +36,43 @@ export default function Login({ status, canResetPassword }: LoginProps) {
         remember: false,
     });
 
-    const submit: FormEventHandler = async (e: FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setErrorMsg('');
-        try {
-            const response = await fetch('http://localhost:8000/api/login', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    // si Laravel espera CSRF-TOKEN en header, descomenta:
-                    // 'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'),
-                },
-                credentials: 'include',
-                body: JSON.stringify({ email, password, remember }),
-            });
+        const submit: FormEventHandler = async (e: FormEvent) => {
+            e.preventDefault();
+            setLoading(true);
+            setErrorMsg('');
 
-            const data = await response.json();
+            try {
+                const response = await fetch('http://localhost:8000/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: data.email,
+                        password: data.password,
+                        remember: data.remember,
+                    }),
+                });
 
-            if (!response.ok) {
-                throw new Error(data.message || 'Error en credenciales');
+                const respData = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(respData.message || 'Error en credenciales');
+                }
+
+                localStorage.setItem('token', respData.token);
+                post(route('login'), {
+                    onFinish: () => reset('password'),
+                });
+            } catch (err: any) {
+                setErrorMsg(err.message);
+            } finally {
+                setLoading(false);
+                reset('password');
             }
-
-            localStorage.setItem('token', data.token);
-            window.location.href = '/dashboard';
-        } catch (err: any) {
-            setErrorMsg(err.message);
-        } finally {
-            setLoading(false);
-        }
-        post(route('login'), {
-            onFinish: () => reset('password'),
-        });
-    };
+        };
 
     return (
         <AuthLayout
