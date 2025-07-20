@@ -62,7 +62,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 throw new Error(respData.message || 'Error en credenciales');
             }
 
-            const encryptedId = CryptoJS.AES.encrypt(respData.user.id.toString(), 'clave-secreta').toString();
+            const encryptedId = CryptoJS.AES.encrypt(respData.user.id.toString(), respData.token).toString();
             localStorage.setItem('eid', encryptedId);
             localStorage.setItem('token', respData.token);
             post(route('login'), {
