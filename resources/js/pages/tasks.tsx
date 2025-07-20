@@ -204,13 +204,13 @@ export default function Tasks() {
                                 <button onClick={() => toggle(task.id)}>
                                     {task.completed ? <CheckCircle className="text-green-500" /> : <Circle className="text-gray-400" />}
                                 </button>
-                                <Link href={`/tasks/detail`} as="a" preserveScroll>
+                                <Link href={`/tasks/detail?task=${task.id}`} as="a" preserveScroll>
                                     <span className={`${task.completed ? 'line-through text-gray-500' : 'text-gray-900 dark:text-gray-100'} font-medium`}>{task.title}</span>
                                 </Link>
                             </div>
 
                             <div className="flex items-center gap-3 mt-3 md:mt-0">
-                                <Link href={`/tasks/edit`} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <Link href={`/tasks/edit?task=${task.id}`} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
                                     <Edit size={18} className="text-gray-700 dark:text-gray-300" />
                                 </Link>
                                 <button onClick={() => confirmRemove(task.id)} className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-700">
