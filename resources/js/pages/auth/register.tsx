@@ -131,6 +131,8 @@ export default function Register() {
                             type="password"
                             required
                             tabIndex={3}
+                            minLength={8}
+                            title="Must be at least 8 characters long"
                             autoComplete="new-password"
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
