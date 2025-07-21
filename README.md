@@ -171,7 +171,7 @@ VITE_APP_NAME="${APP_NAME}"
     php artisan serve
    ```
 
-Acceder en: `http://localhost:8000`
+Acceder en: `http://localhost:8000`, si solo levantas este, recuerda primero hacer `npm run build`
 
 * **Frontend (React + Vite)**:
 
