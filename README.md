@@ -159,7 +159,7 @@ VITE_APP_NAME="${APP_NAME}"
 7. (Opcional) Base de datos para pruebas:
 
    ```sql
-   CREATE DATABASE myapp\_testing;
+   CREATE DATABASE myapp_testing;
    ```
 
 
