@@ -143,7 +143,7 @@ VITE_APP_NAME="${APP_NAME}"
    npm install
    ```
 
-4. Genera la clave de aplicación Laravel:
+4. Genera la clave de aplicación Laravel(para este paso, ya tendras que tener el archivo .env, que esta o bien arriba en este documento, o te lo incluyo como un .env.example):
    ```bash
     php artisan key:generate
     ```
