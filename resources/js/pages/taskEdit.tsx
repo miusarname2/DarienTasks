@@ -64,7 +64,7 @@ export default function TaskEdit() {
                     throw new Error('No se encontró el token de autenticación.');
                 }
 
-                const response = await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
+                const response = await fetch(`${window.location.origin}/api/tasks/${taskId}`, {
                     headers: {
                         'Accept': 'application/json',
                         'Authorization': `Bearer ${authToken}`,
@@ -110,7 +110,7 @@ export default function TaskEdit() {
         // Usa el ID de la tarea cargada
         try {
             const token = localStorage.getItem('token'); // o de donde guardes tu Bearer
-            const response = await fetch(`http://localhost:8000/api/tasks/${task.id}`, {
+            const response = await fetch(`${window.location.origin}/api/tasks/${task.id}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',

@@ -43,7 +43,7 @@ export default function TaskDetail() {
             try {
                 const authToken = localStorage.getItem('token');
 
-                const response = await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
+                const response = await fetch(`${window.location.origin}/api/tasks/${taskId}`, {
                     headers: {
                         'Accept': 'application/json',
                         'Authorization': `Bearer ${authToken}`,

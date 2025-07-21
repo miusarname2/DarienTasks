@@ -34,7 +34,7 @@ export default function Register() {
         setErrorMsg('');
 
         try {
-            const response = await fetch('http://localhost:8000/api/register', {
+            const response = await fetch(`${window.location.origin}/api/register`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',

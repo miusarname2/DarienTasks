@@ -42,7 +42,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
         setErrorMsg('');
 
         try {
-            const response = await fetch('http://localhost:8000/api/login', {
+            const response = await fetch(`${window.location.origin}/api/login`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',

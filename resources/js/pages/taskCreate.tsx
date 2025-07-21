@@ -21,7 +21,7 @@ export default function TaskCreate() {
         try {
             const token = localStorage.getItem('token');
             const id = localStorage.getItem('eid');
-            const response = await fetch('http://localhost:8000/api/tasks', {
+            const response = await fetch(`${window.location.origin}/api/tasks`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',

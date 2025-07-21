@@ -37,7 +37,7 @@ export default function Tasks() {
 
         const eidParam = encodeURIComponent(id ?? "");
 
-        fetch(`http://localhost:8000/api/tasks/byUser?eid=${eidParam}`, {
+        fetch(`${window.location.origin}/api/tasks/byUser?eid=${eidParam}`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -94,7 +94,7 @@ export default function Tasks() {
 
         try {
             // 4. Llamada al API
-            const res = await fetch(`http://localhost:8000/api/tasks/${id}`, {
+            const res = await fetch(`${window.location.origin}/api/tasks/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
@@ -136,7 +136,7 @@ export default function Tasks() {
         setError(null);
 
         try {
-            const res = await fetch(`http://localhost:8000/api/tasks/${selectedId}`, {
+            const res = await fetch(`${window.location.origin}/api/tasks/${selectedId}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
